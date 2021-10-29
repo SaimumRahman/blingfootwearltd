@@ -1,7 +1,6 @@
 package khan.solution.blingfootwearltd.views.rawmaterial;
 
-import khan.solution.blingfootwearltd.data.entity.SamplePerson;
-import khan.solution.blingfootwearltd.data.service.SamplePersonService;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -9,6 +8,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.notification.Notification;
@@ -18,6 +18,8 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.PageTitle;
+import khan.solution.blingfootwearltd.data.model.RawMaterial;
+import khan.solution.blingfootwearltd.data.service.RawMaterialService;
 import khan.solution.blingfootwearltd.views.MainLayout;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.component.icon.Icon;
@@ -25,54 +27,60 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
 import com.vaadin.flow.component.dependency.Uses;
 
-@PageTitle("RawMaterial")
+import java.util.List;
+
+@PageTitle("Raw Material Input")
 @Route(value = "rawmaterials", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
 @Uses(Icon.class)
 public class RawMaterialView extends Div {
 
-    private TextField firstName = new TextField("First name");
-    private TextField lastName = new TextField("Last name");
-    private EmailField email = new EmailField("Email address");
-    private DatePicker dateOfBirth = new DatePicker("Birthday");
-    private PhoneNumberField phone = new PhoneNumberField("Phone number");
-    private TextField occupation = new TextField("Occupation");
+    private Grid<RawMaterial> grid=new Grid<>(RawMaterial.class);
+
+    private TextField nameRM = new TextField("Raw Material Name");
+    private TextField costRM = new TextField("Raw Material Cost");
+    private TextField quantityRM = new TextField("Raw Material Quantity");
+    private TextField boughtFromRM = new TextField("Buy Location");
 
     private Button cancel = new Button("Cancel");
     private Button save = new Button("Save");
 
-    private Binder<SamplePerson> binder = new Binder(SamplePerson.class);
+    private Binder<RawMaterial> binder = new Binder(RawMaterial.class);
 
-    public RawMaterialView(SamplePersonService personService) {
+    public RawMaterialView(RawMaterialService rawMaterialService) {
         addClassName("raw-material-view");
 
         add(createTitle());
         add(createFormLayout());
         add(createButtonLayout());
+        add(grid);
+
 
         binder.bindInstanceFields(this);
         clearForm();
 
         cancel.addClickListener(e -> clearForm());
         save.addClickListener(e -> {
-            personService.update(binder.getBean());
+            rawMaterialService.createRawMaterialInput(binder.getBean());
             Notification.show(binder.getBean().getClass().getSimpleName() + " details stored.");
             clearForm();
+            updateList(rawMaterialService);
         });
+
+        updateList(rawMaterialService);
     }
 
     private void clearForm() {
-        binder.setBean(new SamplePerson());
+        binder.setBean(new RawMaterial());
     }
 
     private Component createTitle() {
-        return new H3("Personal information");
+        return new H3("Raw Material Input");
     }
 
     private Component createFormLayout() {
         FormLayout formLayout = new FormLayout();
-        email.setErrorMessage("Please enter a valid email address");
-        formLayout.add(firstName, lastName, dateOfBirth, phone, email, occupation);
+        formLayout.add(nameRM, costRM, quantityRM, boughtFromRM);
         return formLayout;
     }
 
@@ -85,47 +93,19 @@ public class RawMaterialView extends Div {
         return buttonLayout;
     }
 
-    private static class PhoneNumberField extends CustomField<String> {
-        private ComboBox<String> countryCode = new ComboBox<>();
-        private TextField number = new TextField();
+    private void configureGrid() {
+        grid.addClassName("Raw-Material-Grid");
+        grid.setSizeFull();
+        grid.setColumns("rawMaterialId","nameRM","costRM","quantityRM","boughtFromRM","dateRM");
 
-        public PhoneNumberField(String label) {
-            setLabel(label);
-            countryCode.setWidth("120px");
-            countryCode.setPlaceholder("Country");
-            countryCode.setPattern("\\+\\d*");
-            countryCode.setPreventInvalidInput(true);
-            countryCode.setItems("+354", "+91", "+62", "+98", "+964", "+353", "+44", "+972", "+39", "+225");
-            countryCode.addCustomValueSetListener(e -> countryCode.setValue(e.getDetail()));
-            number.setPattern("\\d*");
-            number.setPreventInvalidInput(true);
-            HorizontalLayout layout = new HorizontalLayout(countryCode, number);
-            layout.setFlexGrow(1.0, number);
-            add(layout);
+    }
+    private void updateList(RawMaterialService service) {
+        List<RawMaterial> up=service.getAllRawMaterials();
+        if (up.isEmpty()){
+            Notification.show("No Data Found");
         }
-
-        @Override
-        protected String generateModelValue() {
-            if (countryCode.getValue() != null && number.getValue() != null) {
-                String s = countryCode.getValue() + " " + number.getValue();
-                return s;
-            }
-            return "";
-        }
-
-        @Override
-        protected void setPresentationValue(String phoneNumber) {
-            String[] parts = phoneNumber != null ? phoneNumber.split(" ", 2) : new String[0];
-            if (parts.length == 1) {
-                countryCode.clear();
-                number.setValue(parts[0]);
-            } else if (parts.length == 2) {
-                countryCode.setValue(parts[0]);
-                number.setValue(parts[1]);
-            } else {
-                countryCode.clear();
-                number.clear();
-            }
+        else {
+            grid.setItems(up);
         }
     }
 

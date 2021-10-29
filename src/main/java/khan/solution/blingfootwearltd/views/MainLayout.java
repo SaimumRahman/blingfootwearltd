@@ -10,6 +10,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Nav;
@@ -32,9 +33,12 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
+import khan.solution.blingfootwearltd.data.model.RawMaterial;
+import khan.solution.blingfootwearltd.data.service.RawMaterialService;
 import khan.solution.blingfootwearltd.views.MainLayout;
 import khan.solution.blingfootwearltd.views.rawmaterial.RawMaterialView;
 import com.vaadin.flow.component.avatar.Avatar;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -94,7 +98,7 @@ public class MainLayout extends AppLayout {
     }
 
     private Component createDrawerContent() {
-        H2 appName = new H2("BlingFootWearLtd");
+        H2 appName = new H2("Bling FootWear Ltd");
         appName.addClassNames("flex", "items-center", "h-xl", "m-0", "px-m", "text-m");
 
         com.vaadin.flow.component.html.Section section = new com.vaadin.flow.component.html.Section(appName,
@@ -126,7 +130,7 @@ public class MainLayout extends AppLayout {
 
     private List<RouterLink> createLinks() {
         MenuItemInfo[] menuItems = new MenuItemInfo[]{ //
-                new MenuItemInfo("RawMaterial", "la la-user", RawMaterialView.class), //
+                new MenuItemInfo("Raw Material", "la la-user", RawMaterialView.class), //
 
         };
         List<RouterLink> links = new ArrayList<>();
